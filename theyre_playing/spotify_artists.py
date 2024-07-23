@@ -8,9 +8,8 @@ import time
 
 CLIENT_ID = 'f54d6dccf417422aa80723f0d1bdf4ee'
 CLIENT_SECRET = '2586b8f249294201ad4902f5a8ab02e8'
-CLIENT_SECRET = os.getenv("SPOTIFY_SECRET", "localhost,127.0.0.1,[::1]").split(",")
+CLIENT_SECRET = os.environ.get("SPOTIFY_SECRET")
 
-CACHE_FILE_NAME = "artists.txt"
 
 class SpotifyArtists:
 

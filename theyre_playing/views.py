@@ -12,10 +12,6 @@ from .spotify_artists import SpotifyArtists
 
 
 def index(request):
-
-
-	return HttpResponse(os.environ.get("SPOTIFY_SECRET"))
-
 	template = loader.get_template('index.html')
 
 	context = {
