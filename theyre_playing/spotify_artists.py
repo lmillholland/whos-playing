@@ -1,13 +1,14 @@
 """
 Requests and collects all Spotify artists a user listens to. (as defined by one of their tracks being in a playlist)
 """
-
+import os
 import requests
 import json
 import time
 
 CLIENT_ID = 'f54d6dccf417422aa80723f0d1bdf4ee'
 CLIENT_SECRET = '2586b8f249294201ad4902f5a8ab02e8'
+CLIENT_SECRET = os.getenv("SPOTIFY_SECRET", "localhost,127.0.0.1,[::1]").split(",")
 
 CACHE_FILE_NAME = "artists.txt"
 
