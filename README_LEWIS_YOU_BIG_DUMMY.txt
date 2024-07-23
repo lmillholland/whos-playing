@@ -21,5 +21,5 @@ To deploy to Koyeb, push to git:
 	git commit -m "<COMMIT COMMENT>"
 	git push -u origin main
 
-Then on Koyeb website find our whos-playing service and re-deploy it. Can access at https://basic-juliette-lewisv-07ce2c68.koyeb.app/
+Then on Koyeb website find our whos-playing service and re-deploy it. Can access at https://basic-juliette-lewisv-07ce2c68.koyeb.app/theyre_playing/
 	^ (but maybe we need sub-directories now for theyre_playing?)
