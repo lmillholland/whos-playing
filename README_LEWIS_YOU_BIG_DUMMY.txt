@@ -5,7 +5,7 @@ Activate a virtual environment:
 	source venv/bin/activate
 
 
-Pip a buncha stuff:
+Pip a buncha stuff (or maybe import requirements.txt? unclear):
 	pip install Django gunicorn whitenoise   
 	pip install requests
 
