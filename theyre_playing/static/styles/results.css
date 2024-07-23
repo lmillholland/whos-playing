@@ -1,0 +1,133 @@
+body
+{
+	color: white;
+	background: black;
+	font-family: 'circular-std';
+}
+
+@font-face {
+	font-family: 'circular-std';
+  	src: local('Circular-Std'),
+       url('../../static/fonts/circular-std.ttf') format("truetype");
+}
+
+@font-face {
+	font-family: 'liberation-sans';
+  	src: local('LiberationSans-Regular'),
+       url('../../static/fonts/LiberationSans-Regular.ttf') format("truetype");
+}
+
+:root {
+  --section-height: 35vh;
+  --section-padding: 1.5vh;
+  --profile-image-padding: 3vh;
+  --track-height: calc((var(--section-height) - 10vh) / 5);
+}
+
+main {
+	max-width: 800px;
+	margin: 0px auto;
+	padding-top: 48px;
+}
+
+a {
+	color: white;
+	text-decoration: none;
+}
+
+.artist-block {
+	width: 100%;
+	height: var(--section-height);
+	background: #181818;
+	position: relative;
+	color: white;
+	border-radius: 4px;
+	margin-bottom: 5.4vh;
+}
+
+.artist-profile-image {
+	height: calc(var(--section-height) - 2 * (var(--section-padding) + var(--profile-image-padding)));
+	width: calc(var(--section-height) - 2 * (var(--section-padding) + var(--profile-image-padding)));
+	margin-top: calc(var(--section-padding) + var(--profile-image-padding));
+	margin-left: calc(var(--section-padding) + var(--profile-image-padding));
+	float: left;
+	border-radius: 50%;
+}
+
+.artist-block h2 {
+	width: var(--section-height);
+	position: absolute;
+	margin-bottom: 0px;
+	bottom: var(--section-padding);
+	left: 6px;
+	font-size: 30pt;
+    overflow: hidden;
+	white-space: nowrap;
+	display: inline-block;
+	text-overflow: ellipsis;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    .artist-block h2 {
+	    display: -webkit-box;
+		white-space: wrap;
+		-webkit-line-clamp: 2;
+	    -webkit-box-orient: vertical;
+    }
+}
+
+.artist-tracks {
+	margin-left: 7vh;
+	width: calc(100% - var(--section-height) - 2 * var(--section-padding) - 4vh);
+	float: left;
+}
+
+.artist-tracks-header {
+	font-size: 14pt;
+	padding: 8px;
+	padding-left: 0px;
+}
+
+.artist-block table {
+	font-size: 11.5pt;
+	font-family: "liberation-sans";
+	text-align: center;
+	table-layout: fixed;
+	width: 100%;
+  	border-collapse: collapse;
+}
+
+.artist-block tr {
+	height: var(--track-height);
+}
+
+.artist-block td {
+	width: 10%;
+	white-space: nowrap;
+	padding-bottom: 4px;
+}
+
+.artist-block td:nth-child(3) {
+	width: 80%;
+	text-align: left;
+	padding-left: 2vh;
+}
+
+.artist-block td img {
+	height: var(--track-height);
+}
+
+.track-count {
+	font-size: 10pt;
+	color: #999;
+}
+
+.artist-external-link {
+	position: absolute;
+	right: 3px;
+	top: 3px;
+	width: 36px;
+	height: 36px;
+	color: rgb(101, 212, 110);
+	letter-spacing: 3px;
+}

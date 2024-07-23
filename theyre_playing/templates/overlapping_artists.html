@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Results</title>
+	{% load static %}
+	<link rel="stylesheet" href="{% static 'styles/results.css' %}">
+</head>
+<body>
+	<main>
+		<!-- <h1>{{ spotify_username }}</h1> -->
+		{% for artist in artists %}
+		<section class="artist-block">
+			<img class="artist-profile-image" src="{{ artist.image_url }}" />
+			<a href="{{ artist.href }}" class="artist-external-link" target="_blank">...</a>
+			<h2><a href="{{artist.href}}" target="_blank">{{ artist.name }}</a></h2>
+			<section class="artist-tracks">
+				<div class="artist-tracks-header">Tracks you may recognize:</div>
+				<table>
+				{% for track in artist.tracks|slice:"5" %}
+					<tr>
+						<td>
+							<span class="track-count">
+								{{ forloop.counter }}
+							</span>
+						</td>
+						<td>
+							<img src="{{ track.image_url }}" />
+						</td>
+						<td>
+							<a href="{{ track.href }}" target="_blank">{{ track.name }}</a>
+						</td>
+					</tr>
+				{% endfor %}
+				</table>
+			</section>
+		</section>
+		{% empty %}
+		<h1>No artists</h1>
+	    {% endfor %}
+	    <hr style="border-color: white">
+		<ul>
+			<h1>Playlists (found {{ playlists|length }}) for user {{ username }}:</h1>
+			<ul>
+				{% for playlist in playlists %}
+				<li>{{ playlist }}</li>
+				{% endfor %}
+			</ul>
+		</ul>
+	</main>
+</body>
+</html>

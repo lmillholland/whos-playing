@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Who's Playing?</title>
+	{% load static %}
+	<link rel="stylesheet" href="{% static 'styles/index.css' %}">
+	<script>
+		function HideForm() {
+			document.getElementById("find-artists-form").style.display="none";
+			document.getElementById("form-loading").style.display="block";
+		}
+	</script>
+</head>
+<body>
+	<main>
+		<h1>Which of your favorite bands are playing at Treefort?</h1>
+		<h2>I mean, I don't know. That's why I made this.</h2>
+		<br>
+		<br>
+		<form action='findArtists/' id="find-artists-form" method='POST' onsubmit="HideForm();">
+			{% csrf_token %}
+			<input type="text" name="textfield" placeholder="Your Spotify username">
+			<br>
+			<br>
+			<button type='submit'>Let's find out!</button>
+		</form>
+		<div id="form-loading" style="display: none">
+			<img src="{% static 'images/loading.gif' %}" width="64px"/>
+			<br>
+			<br>
+			<p>
+				This can take several minutes, esp. if you have many playlists.
+			</p>
+			<p>
+				Grab a snack and check back in a while.
+			</p>
+		</div>
+	</main>
+</body>
+</html>
