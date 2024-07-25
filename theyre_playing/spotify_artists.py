@@ -1,69 +1,65 @@
 """
 Requests and collects all Spotify artists a user listens to. (as defined by one of their tracks being in a playlist)
 """
+from django.conf import settings
+
 import os
 import requests
 import json
 import time
 
-CLIENT_ID = 'f54d6dccf417422aa80723f0d1bdf4ee'
-CLIENT_SECRET = '2586b8f249294201ad4902f5a8ab02e8'
-CLIENT_SECRET = os.environ.get("SPOTIFY_SECRET")
-
-
 class SpotifyArtists:
 
-	def FetchArtists(self, user_id):
-		access_token = self.GetAccessToken(CLIENT_ID, CLIENT_SECRET)
-		playlists = self.FetchUserPlaylists(access_token, f"https://api.spotify.com/v1/users/{user_id}/playlists")
-		access_token = self.GetAccessToken(CLIENT_ID, CLIENT_SECRET)
-		artists = self.OrganizeTracksByArtist(playlists, access_token)
+	def FetchArtists(self, user_id, lineup):
+		""" ... """
+
+		self.user_id = user_id
+		self.access_token = self.GetAccessToken()
+
+		artist_ids_to_tracks = {
+			artist["spotify_id"]: []
+			for artist in lineup
+		}
+
+		# organize tracks by artist ID
+		playlists = self.FetchUserPlaylists()
+		for playlist in playlists:
+			for track in playlist.FetchTracks(self.access_token):
+				for artist_id in track.artist_ids:
+					if artist_id in artist_ids_to_tracks:
+						if track not in artist_ids_to_tracks[artist_id]:
+							artist_ids_to_tracks[artist_id].append(track)
+
+		# prune empty artists
+		artist_ids_to_tracks = {
+			k: v for k,v in artist_ids_to_tracks.items()
+			if len(v) > 0
+		}
+
+		# retrieve artist data
+		artists = self.FetchAllArtistData(list(artist_ids_to_tracks.keys()))
+		for artist in artists:
+			artist.tracks = artist_ids_to_tracks[artist.id]
+
+		# clean data
 		artists_json = {
-			"artists": [artist.GetDataAsDict() for artist in artists],
+			"artists": [
+				artist.GetDataAsDict() for artist in artists
+				if len(artist.tracks) > 0
+			],
 			"playlists": [p.name for p in playlists]
 		}
 
 		return artists_json
-	
-
-	def OrganizeTracksByArtist(self, playlists, access_token):
-		# get all unique tracks
-		tracks = list()
-		for playlist in playlists:
-			playlist_tracks = playlist.FetchTracks(access_token)
-			for track in playlist_tracks:
-				if track not in tracks:
-					tracks.append(track)
-
-		# get all artist ids (unique)
-		artist_ids = list()
-		for track in tracks:
-			for artist_id in track.artist_ids:
-				if artist_id != None:
-					if artist_id not in artist_ids:
-						artist_ids.append(artist_id)
-
-		# get all artist data
-		all_artist_data = self.FetchAllArtistsData(access_token, artist_ids)
-		artists = [SpotifyArtist(a) for a in all_artist_data]
-
-		# add tracks to artists
-		for artist in artists:
-			for track in tracks:
-				if artist.id in track.artist_ids:
-					if track not in artist.tracks:
-						artist.tracks.append(track)
-
-		return artists
 
 
-	def FetchAllArtistsData(self, access_token, artist_ids, artists_data=[]):
+	def FetchAllArtistData(self, artist_ids, artists_data=[]):
 		# make request
 		id_args = ",".join(artist_ids[:50])
 		request_url = "https://api.spotify.com/v1/artists?ids=" + id_args
 		headers = {
 			'content-type': 'application/json',
-			'Authorization': f"Bearer {access_token}",
+			'Authorization': f"Bearer {self.access_token}",
 			'Accept-Charset': 'UTF-8'
 		}
 		response = requests.get(request_url, headers=headers).json()
@@ -71,48 +67,56 @@ class SpotifyArtists:
 		# batch response
 		artists_data.extend(response.get("artists", []))
 		if len(artist_ids) > 50:
-			return self.FetchAllArtistsData(access_token, artist_ids[50:], artists_data)
+			return self.FetchAllArtistData(artist_ids[50:], artists_data)
 
-		return artists_data
-
-	def FetchArtist(self, access_token, artist_id):
-		# obsolete: please use FetchAllArtistsData instead, for batching purposes
-		request_url = "https://api.spotify.com/v1/artists/" + artist_id
-		headers = {
-			'content-type': 'application/json',
-			'Authorization': f"Bearer {access_token}",
-			'Accept-Charset': 'UTF-8'
-		}
-		response = requests.get(request_url, headers=headers).json()
-
-		return SpotifyArtist(response)
+		return [SpotifyArtist(a) for a in artists_data]
 
 
-	def FetchUserPlaylists(self, access_token, request_url, playlists=[]):
+	def FetchUserPlaylists(self, request_url=None, playlists=[]):
 		""" Get all user playlists. """
+		if request_url == None:
+			request_url = f"https://api.spotify.com/v1/users/{self.user_id}/playlists"
+
 		headers = {
 			'content-type': 'application/json',
-			'Authorization': f"Bearer {access_token}",
+			'Authorization': f"Bearer {self.access_token}",
 			'Accept-Charset': 'UTF-8'
 		}
 		response = requests.get(request_url, headers=headers).json()
 
 		# parse playlists
-		for playlist_data in response['items']:
+		for playlist_data in response.get('items', []):
 			playlist = SpotifyPlaylist(playlist_data)
 			playlists.append(playlist)
 
 		# proceed to next batch, or exit
-		if response['next'] != None:
-			return self.GetUserPlaylists(access_token, response['next'], playlists)
+		if response.get('next') != None:
+			return self.GetUserPlaylists(response['next'], playlists)
 
 		return playlists
 
 
-	def GetAccessToken(self, client_id, client_secret):
+	@staticmethod
+	def GetAccessToken():
 		""" The access token is a string which contains the credentials and permissions that can be 
 		used to access a given resource (e.g artists, albums or tracks) or user's data (e.g your profile 
 		or your playlists). """
+		client_id = 'f54d6dccf417422aa80723f0d1bdf4ee'
+
+		print("!!!")
+
+		credentials_filepath = os.path.join(settings.BASE_DIR, 'theyre_playing/static/credentials.json')
+		print("???")
+		print(credentials_filepath)
+		if os.path.isfile(credentials_filepath):
+			with open(credentials_filepath, "r") as file:
+				client_secret = json.load(file)["spotify_secret"]
+		else:
+			client_secret = os.environ.get("SPOTIFY_SECRET")
+
+		is_file = os.path.isfile(credentials_filepath)
+		print(f"Is file: {is_file}")
+
 		url = 'https://accounts.spotify.com/api/token'
 		payload = f"grant_type=client_credentials&client_id={client_id}&client_secret={client_secret}"
 		headers = {'content-type': 'application/x-www-form-urlencoded', 'Accept-Charset': 'UTF-8'}
@@ -210,7 +214,17 @@ class SpotifyArtist:
 
 
 
+def get_venue_lineup():
+	filepath = "static/data/lineup.json"
+	with open(filepath, 'r') as file:
+		return json.load(file)["lineup"]
+
+
 if __name__ == "__main__":
-	spotify_artists = SpotifyArtists().FetchArtists("tscwnvw")
+	spotify_artists = SpotifyArtists().FetchArtists("630washington", get_venue_lineup())
+	print(json.dumps(spotify_artists, indent=2))
+
+	'''
 	with open("cached_artists_TIAN.json", "w+", encoding='utf-8') as f:
 		json.dump(spotify_artists, f, ensure_ascii=False, indent=4)
+	'''

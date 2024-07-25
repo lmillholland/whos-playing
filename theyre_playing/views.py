@@ -38,7 +38,8 @@ def find_artists(request):
 	if request.method == 'POST':
 		# fetch spotify data
 		spotify_username = request.POST.get('textfield', None)
-		spotify_data = SpotifyArtists().FetchArtists(spotify_username)
+		lineup = get_venue_lineup()
+		spotify_data = SpotifyArtists().FetchArtists(spotify_username, lineup)
 
 		'''
 		if spotify_username == "630washington":
@@ -49,15 +50,9 @@ def find_artists(request):
 			spotify_data = SpotifyArtists().FetchArtists(spotify_username)
 		'''
 
-		# compare to venue
-		venue_artists = [x.lower() for x in get_venue_lineup()]
-		data = {
-			"artists": [a for a in spotify_data["artists"] if a["name"].lower() in venue_artists],
-			"playlists": spotify_data["playlists"],
-			"username": spotify_username
-		}
+		spotify_data["username"] = spotify_username
 
 		template = loader.get_template('overlapping_artists.html')
-		return HttpResponse(template.render(data))
+		return HttpResponse(template.render(spotify_data))
 
 	return render(request, 'template.html', locals())

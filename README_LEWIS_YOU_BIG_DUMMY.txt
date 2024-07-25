@@ -5,9 +5,8 @@ Activate a virtual environment:
 	source venv/bin/activate
 
 
-Pip a buncha stuff (or maybe import requirements.txt? unclear):
-	pip install Django gunicorn whitenoise   
-	pip install requests
+Pip a buncha stuff:
+	pip install -r requirements.txt
 
 
 whos_playing is the project, and theyre_playing is the app. All visual code, all spotyify processing, everytying really lives on theyre_playing.
