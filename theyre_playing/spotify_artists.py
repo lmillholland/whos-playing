@@ -103,19 +103,12 @@ class SpotifyArtists:
 		or your playlists). """
 		client_id = 'f54d6dccf417422aa80723f0d1bdf4ee'
 
-		print("!!!")
-
 		credentials_filepath = os.path.join(settings.BASE_DIR, 'theyre_playing/static/credentials.json')
-		print("???")
-		print(credentials_filepath)
 		if os.path.isfile(credentials_filepath):
 			with open(credentials_filepath, "r") as file:
 				client_secret = json.load(file)["spotify_secret"]
 		else:
 			client_secret = os.environ.get("SPOTIFY_SECRET")
-
-		is_file = os.path.isfile(credentials_filepath)
-		print(f"Is file: {is_file}")
 
 		url = 'https://accounts.spotify.com/api/token'
 		payload = f"grant_type=client_credentials&client_id={client_id}&client_secret={client_secret}"
